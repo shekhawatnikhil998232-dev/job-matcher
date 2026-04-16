@@ -1,0 +1,229 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentorship — JobSkillMatcher</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .mentors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+    .mentor-card {
+      background: var(--surface);
+      border: 4px solid var(--border);
+      padding: 24px;
+      box-shadow: 8px 8px 0 var(--border);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .mentor-card:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 12px 12px 0 var(--border);
+    }
+    .m-avatar {
+      width: 80px;
+      height: 80px;
+      background: var(--accent);
+      border: 3px solid var(--border);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 16px;
+      box-shadow: 4px 4px 0 var(--border);
+      font-family: var(--font-head);
+      font-weight: 900;
+      color: #000;
+    }
+    .m-name { font-size: 24px; font-family: var(--font-head); font-weight: 900; margin-bottom: 4px; color:var(--text); }
+    .m-role { font-size: 15px; font-weight: 700; color: var(--text-2); margin-bottom: 16px; }
+    .m-company { background: #fff; padding: 4px 8px; border: 2px solid var(--border); font-size: 12px; font-weight: 800; display: inline-block; position: absolute; top: 24px; right: 24px; color: #000; }
+    .m-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .m-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 8px; border: 2px solid var(--border); background: var(--surface-2); color: var(--text);}
+    
+    /* Specific Colors for variety */
+    .bg-yellow { background: #ffcc00; }
+    .bg-cyan { background: #00e5ff; }
+    .bg-pink { background: #ff3366; color: #fff;}
+    .bg-green { background: #00ff66; }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none; justify-content: center; align-items: center;
+      z-index: 100;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 5px solid var(--border);
+      padding: 40px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 12px 12px 0 var(--border);
+      text-align: center;
+    }
+    .time-slot {
+      display: block; width: 100%; padding: 16px; margin-bottom: 12px;
+      background: var(--surface-2); border: 3px solid var(--border); color: var(--text);
+      font-family: var(--font-body); font-weight: 700; cursor: pointer; transition: 0.1s;
+    }
+    .time-slot:hover { background: var(--accent); color: #fff; transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--border); }
+  </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script></head>
+<body>
+
+<div class="bg-blob"></div>
+
+<div class="page">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-icon">🎯</div>
+      JobSkillMatcher
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html" class="">Dashboard</a>
+      <a href="jobs.html" class="">Jobs</a>
+      <a href="tracker.html" class="">Job Tracker</a>
+      <a href="mentors.html" class="active">Mentors</a>
+      <a href="insights.html" class="">Campus Insights</a>
+      <a href="chat.html" class="">AI Chat</a>
+      <a href="leaderboard.html" class="">Leaderboard</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-name"></span>
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <div class="dropdown-content">
+        <a href="profile.html">👤 Profile</a>
+        <button onclick="logout()" style="color: #ef4444;">🚪 Logout</button>
+      </div>
+    </div>
+  </nav>
+  
+    <main style="padding: 40px; max-width: 1200px; margin: 0 auto;">
+    <h1 class="page-title brutal-reveal" style="font-size: 55px; text-transform:uppercase; margin-bottom:10px; text-align:center;">Mentorship Marketplace</h1>
+    <p style="font-size:18px; color:var(--text-3); font-weight:600; text-align:center; max-width:800px; margin:0 auto 20px;">Skip the cold emails. Find a Senior Engineer whose culture perfectly matches yours, and instantly book a 15-minute sync.</p>
+    
+    <div style="text-align:center; margin-bottom: 40px;" class="brutal-reveal">
+       <a href="mentor-signup.html" class="btn btn-secondary" style="border-width:2px; font-size:14px; padding: 12px 24px;">🚀 Become a Mentor</a>
+    </div>
+
+    <div class="mentors-grid brutal-reveal" id="mentors-container">
+      <!-- Injected via JS -->
+    </div>
+  </main>
+  </div>
+
+<!-- Scheduling Modal -->
+<div class="modal-overlay" id="book-modal">
+  <div class="modal-box fade-in">
+    <h2 style="font-size:32px; font-family:var(--font-head); font-weight:900; margin-bottom:8px; color:var(--text);">Schedule Chat</h2>
+    <p style="color:var(--text-2); font-weight:600; margin-bottom: 30px;">Select a 15-minute block to meet with <strong id="modal-mentor-name" style="color:var(--accent);"></strong>.</p>
+    
+    <div id="calendar-slots">
+      <button class="time-slot" onclick="confirmBooking('Today @ 4:00 PM EST')">Today @ 4:00 PM EST</button>
+      <button class="time-slot" onclick="confirmBooking('Tomorrow @ 11:30 AM EST')">Tomorrow @ 11:30 AM EST</button>
+      <button class="time-slot" onclick="confirmBooking('Tomorrow @ 5:00 PM EST')">Tomorrow @ 5:00 PM EST</button>
+    </div>
+
+    <div id="booking-success" style="display:none; padding:40px 0;">
+      <div style="font-size:60px; margin-bottom:20px;">✅</div>
+      <h3 style="font-size:24px; font-weight:900; color:var(--text);">Calendar Invite Sent!</h3>
+      <p style="color:var(--text-2); margin-top:10px;">Check your email for the Google Meet link. Make sure your prep is sharp.</p>
+      <button class="btn btn-primary" style="margin-top:30px; width:100%; border-width:3px;" onclick="closeModal()">Return to Marketplace</button>
+    </div>
+
+    <button class="btn btn-secondary" id="cancel-btn" style="width:100%; margin-top:20px; border-width:3px; background:var(--surface);" onclick="closeModal()">Cancel Search</button>
+  </div>
+</div>
+
+<script>
+  const user = localStorage.getItem("user");
+  const token = localStorage.getItem("token");
+  if (!user || !token) window.location.href = "login.html";
+  document.getElementById("nav-name").textContent = user;
+  document.getElementById("nav-avatar").textContent = user[0].toUpperCase();
+
+  let mentors = [];
+  let selectedMentorId = null;
+
+  async function fetchMentors() {
+    try {
+      const res = await fetch('/api/mentors', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      if(data.mentors) {
+         mentors = data.mentors;
+         renderMentors();
+      }
+    } catch(err) { console.error("Failed to fetch mentors"); }
+  }
+
+  function renderMentors() {
+    const container = document.getElementById("mentors-container");
+    container.innerHTML = mentors.map((m, i) => `
+      <div class="mentor-card fade-in" style="animation-delay: ${i * 0.05}s">
+        <div class="m-company">${m.company}</div>
+        <div class="m-avatar ${m.color}">${m.avatar}</div>
+        <div class="m-name">${m.name}</div>
+        <div class="m-role">${m.role}</div>
+        <div class="m-tags">
+          ${m.tags.split(',').map(t => `<span class="m-tag">${t}</span>`).join('')}
+        </div>
+        <button class="btn btn-primary" style="width:100%; padding:14px; font-size:16px; border-width:3px; box-shadow: 4px 4px 0 var(--border);" 
+            onclick="${m.scheduling_link ? `window.open('${m.scheduling_link}', '_blank')` : `openModal('${m.id}', '${m.name}')`}">
+            ☕ ${m.scheduling_link ? 'Book via Calendly ↗' : 'Book 15-Min Chat'}
+        </button>
+      </div>
+    `).join("");
+  }
+
+  function openModal(mentorId, name) {
+    selectedMentorId = mentorId;
+    document.getElementById("modal-mentor-name").textContent = name;
+    document.getElementById("calendar-slots").style.display = "block";
+    document.getElementById("booking-success").style.display = "none";
+    document.getElementById("cancel-btn").style.display = "block";
+    document.getElementById("book-modal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("book-modal").style.display = "none";
+    selectedMentorId = null;
+  }
+
+  async function confirmBooking(timeSlot) {
+    if(!selectedMentorId) return;
+    
+    // Hide buttons during loading
+    const slots = document.getElementById("calendar-slots");
+    slots.style.opacity = "0.5";
+    slots.style.pointerEvents = "none";
+
+    try {
+      await fetch('/api/mentors/book', {
+        method: "POST",
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mentor_id: selectedMentorId, time_slot: timeSlot })
+      });
+      
+      slots.style.display = "none";
+      slots.style.opacity = "1";
+      slots.style.pointerEvents = "auto";
+      document.getElementById("cancel-btn").style.display = "none";
+      document.getElementById("booking-success").style.display = "block";
+    } catch(e) {
+      alert("Failed to book mentor.");
+      slots.style.opacity = "1";
+      slots.style.pointerEvents = "auto";
+    }
+  }
+
+  fetchMentors();
+</script>
+
+
+<script src="animations.js"></script></body></html>

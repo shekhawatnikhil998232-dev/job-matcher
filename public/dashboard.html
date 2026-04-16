@@ -1,0 +1,530 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — JobSkillMatcher</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script></head>
+<body>
+<div class="bg-blob"></div>
+<script>
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
+  if (!token || !user) window.location.href = "login.html";
+</script>
+
+<div class="page">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-icon">🎯</div>
+      JobSkillMatcher
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="jobs.html" class="">Jobs</a>
+      <a href="tracker.html" class="">Job Tracker</a>
+      <a href="mentors.html" class="">Mentors</a>
+      <a href="insights.html" class="">Campus Insights</a>
+      <a href="chat.html" class="">AI Chat</a>
+      <a href="leaderboard.html" class="">Leaderboard</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-name"></span>
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <div class="dropdown-content">
+        <a href="profile.html">👤 Profile</a>
+        <button onclick="logout()" style="color: #ef4444;">🚪 Logout</button>
+      </div>
+    </div>
+  </nav>
+  <div class="dashboard-layout brutal-reveal"><aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Core Platform</div>
+        <a class="sidebar-item active" href="dashboard.html"><span style="font-size:16px;">📊</span> Career Roadmap</a>
+        <a class="sidebar-item" href="jobs.html"><span style="font-size:16px;">💼</span> Jobs Matchmaker</a>
+        <a class="sidebar-item" href="chat.html"><span style="font-size:16px;">🎙️</span> AI Mock Interviews</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Advanced Tools</div>
+        <a class="sidebar-item" href="tracker.html"><span style="font-size:16px;">📋</span> Job Tracker</a>
+        <a class="sidebar-item" href="mentors.html"><span style="font-size:16px;">🤝</span> Mentors</a>
+        <a class="sidebar-item" href="insights.html"><span style="font-size:16px;">📈</span> Market Analytics</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Community</div>
+        <a class="sidebar-item" href="leaderboard.html"><span style="font-size:16px;">🏆</span> Leaderboard</a>
+      </div>
+         </aside><main class="dashboard-main fade-in">
+      <p class="page-sub brutal-reveal" id="welcome-msg">Loading...</p>
+      <h1 class="page-title brutal-reveal">Career Roadmap</h1>
+
+      <div id="loader" style="margin-top:20px; color:var(--text-3);">Checking your roadmap...</div>
+
+      <!-- INITIAL LOAD: SKILLS ENTRY -->
+      <div id="upload-section" style="display: none; margin-top: 30px;">
+        <div class="form-group" style="max-width:400px; margin: 0 auto 20px auto;">
+          <label class="form-label" for="target-role" style="text-align:left;">What is your target role?</label>
+          <input type="text" id="target-role" placeholder="e.g. Fullstack Developer, Data Scientist">
+        </div>
+
+        <div class="form-group" style="max-width:400px; margin: 0 auto 20px auto;">
+          <label class="form-label" for="github-username" style="text-align:left;">Want to skip typing? Autofill from GitHub 🐙</label>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="github-username" placeholder="Enter your GitHub Username" style="flex:1;">
+            <button class="btn btn-secondary" onclick="fetchGithubSkills()" id="gh-btn" style="padding: 0 15px;">Fetch Repos</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="max-width:400px; margin: 0 auto 20px auto;">
+          <label class="form-label" for="skills-input" style="text-align:left;">What skills do you currently have?</label>
+          <textarea id="skills-input" placeholder="e.g. HTML, CSS, intermediate Python, basic SQL..." rows="3" style="width:100%; padding: 12px 16px; background: var(--surface); border: 2px solid var(--border-2); border-radius:12px; color:var(--text); font-family:var(--font-body); resize:none;"></textarea>
+        </div>
+
+        <div style="text-align:center;">
+          <button class="btn btn-primary" onclick="generateRoadmap()" id="generate-btn">Generate AI Roadmap ✨</button>
+          <p id="upload-status" style="margin-top:12px; color:var(--accent-2); font-weight:bold; display:none;"></p>
+        </div>
+      </div>
+
+      <!-- ACTIVE ROADMAP: GAMIFIED VIEW -->
+      <div id="roadmap-section" style="display: none; margin-top: 30px;">
+        <h3 style="font-family:var(--font-head); font-size:24px;" id="roadmap-title"></h3>
+        
+        <div class="progress-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p style="margin-top:-20px; margin-bottom: 30px; font-size:14px; color:var(--text-2); text-align:right;" id="progress-text">0% Ready</p>
+
+        <h4 style="color:var(--text); margin-bottom:12px; font-size:16px;">Skills You Have ✅</h4>
+        <div class="skill-tags" id="skills-acquired" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+
+        <!-- RADAR CHART INJECTION -->
+        <h4 style="color:var(--text); margin-bottom:12px; font-size:16px; margin-top:30px;">AI Skill Radar Polygon 💠</h4>
+        <div class="stat-card brutal-reveal" style="display:flex; justify-content:center; align-items:center; background:#fff;" data-tilt="" data-tilt-max="4" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1">
+          <canvas id="skillRadar" style="max-height: 350px;"></canvas>
+        </div>
+
+        <h4 style="color:var(--text); margin-bottom:12px; font-size:16px; margin-top:30px;">Skills to Learn 🚀 (Click to check off)</h4>
+        <div id="skills-missing-list"></div>
+
+        <button class="btn btn-primary" id="btn-resume" onclick="generateResume()" style="width:100%; margin-top:30px; padding:20px; font-size:20px;">📄 GENERATE ATS RESUME</button>
+        <button class="btn btn-secondary" style="margin-top:20px; width:100%;" onclick="resetRoadmap()">Create New Roadmap</button>
+      </div>
+
+    </main></div></div>
+
+
+<!-- HIDDEN A4 RESUME TEMPLATE FOR HTML2PDF -->
+<div id="resume-template" style="display:none; padding:40px; font-family: 'Helvetica', Arial, sans-serif; color:#000; background:#fff; width: 800px; text-align:left;">
+  <h1 id="r-name" style="font-size:36px; margin-bottom:5px; text-transform:uppercase; text-align:center;">Name</h1>
+  <p style="text-align:center; font-size:14px; margin-bottom:20px; color:#555;"><span id="r-email">email@domain.com</span> | LinkedIn | GitHub</p>
+  
+  <div style="border-bottom:2px solid #000; margin-bottom:10px;">
+    <h3 style="font-size:18px; text-transform:uppercase; margin-bottom:5px;">Professional Summary</h3>
+  </div>
+  <p id="r-summary" style="font-size:14px; line-height:1.5; margin-bottom:20px;"></p>
+  
+  <div style="border-bottom:2px solid #000; margin-bottom:10px;">
+    <h3 style="font-size:18px; text-transform:uppercase; margin-bottom:5px;">Experience</h3>
+  </div>
+  <div id="r-experience" style="margin-bottom:20px;"></div>
+  
+  <div style="border-bottom:2px solid #000; margin-bottom:10px;">
+    <h3 style="font-size:18px; text-transform:uppercase; margin-bottom:5px;">Projects</h3>
+  </div>
+  <div id="r-projects" style="margin-bottom:20px;"></div>
+</div>
+
+<script>
+document.getElementById("nav-name").textContent = user;
+document.getElementById("nav-avatar").textContent = user ? user[0].toUpperCase() : "?";
+document.getElementById("welcome-msg").textContent = "Welcome back, " + user + " 👋";
+
+let activeRoadmap = null;
+
+async function fetchRoadmap() {
+  try {
+    const res = await fetch('/api/roadmap', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    document.getElementById("loader").style.display = "none";
+    if (data.roadmap) {
+      activeRoadmap = data.roadmap;
+      renderRoadmap();
+    } else {
+      document.getElementById("upload-section").style.display = "block";
+    }
+  } catch (err) {
+    document.getElementById("loader").textContent = "Failed to load mapping.";
+  }
+}
+
+async function generateResume() {
+  const btn = document.getElementById("btn-resume");
+  btn.textContent = "GENERATING AI RESUME... (Takes 5-10s)";
+  btn.disabled = true;
+  
+  try {
+     const acqSkills = activeRoadmap.skills_acquired || [];
+     const compSkills = (activeRoadmap.skills_missing || []).filter(s => s.completed).map(s => s.skill);
+     const totalSkills = [...acqSkills, ...compSkills];
+     
+     const res = await fetch("/api/generate-resume", {
+       method: "POST", headers: {"Content-Type":"application/json", "Authorization": "Bearer "+token},
+       body: JSON.stringify({ skills: totalSkills, target_role: activeRoadmap.target_role, name: user, email: user.toLowerCase()+"@test.com" })
+     });
+     const data = await res.json();
+     if(data.error) throw new Error(data.error);
+
+     const rEl = document.getElementById("resume-template");
+     
+     document.getElementById("r-name").textContent = user;
+     document.getElementById("r-email").textContent = user.toLowerCase() + "@test.com";
+     document.getElementById("r-summary").textContent = data.summary;
+     
+     document.getElementById("r-experience").innerHTML = (data.experience || []).map(e => `
+       <div style="margin-bottom:12px;">
+         <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
+           <span>${e.title} - ${e.company}</span>
+           <span>${e.duration}</span>
+         </div>
+         <ul style="font-size:13px; margin-top:5px; padding-left:20px; line-height:1.4;">
+           ${(e.bullets || []).map(b => `<li style="margin-bottom:4px;">${b}</li>`).join('')}
+         </ul>
+       </div>
+     `).join('');
+     
+     document.getElementById("r-projects").innerHTML = (data.projects || []).map(p => `
+       <div style="margin-bottom:12px;">
+         <div style="font-weight:bold; font-size:14px;">${p.title} | <span style="font-weight:normal; font-style:italic;">${p.tech_stack}</span></div>
+         <ul style="font-size:13px; margin-top:5px; padding-left:20px; line-height:1.4;">
+           ${(p.bullets || []).map(b => `<li style="margin-bottom:4px;">${b}</li>`).join('')}
+         </ul>
+       </div>
+     `).join('');
+     
+     rEl.style.display = "block";
+     const opt = {
+       margin:       15,
+       filename:     user.replace(' ', '_') + '_Resume.pdf',
+       image:        { type: 'jpeg', quality: 0.98 },
+       html2canvas:  { scale: 2 },
+       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+     };
+     await html2pdf().set(opt).from(rEl).save();
+     rEl.style.display = "none";
+     
+     btn.textContent = "📄 GENERATE ATS RESUME";
+  } catch (err) {
+     console.error(err);
+     alert("Failed to generate resume: " + err.message);
+     btn.textContent = "📄 GENERATE ATS RESUME";
+  }
+  btn.disabled = false;
+}
+
+let radarChartInstance = null;
+function renderRadarChart(baseScoreMultiplier) {
+  const ctx = document.getElementById('skillRadar').getContext('2d');
+  if (radarChartInstance) radarChartInstance.destroy();
+
+  const base = Math.min(30 + (baseScoreMultiplier * 10), 90);
+  
+  radarChartInstance = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Architecture', 'Frontend', 'Backend', 'Databases', 'Algorithms', 'DevOps'],
+      datasets: [{
+        label: 'Your Current DNA',
+        data: [base-10, base+5, base, base-5, base+10, base-20],
+        fill: true,
+        backgroundColor: 'rgba(255, 51, 102, 0.4)',
+        borderColor: '#050505',
+        pointBackgroundColor: '#000',
+        pointBorderColor: '#050505',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: '#050505',
+        borderWidth: 4
+      }, {
+        label: 'Target ' + (activeRoadmap.target_role || 'Role'),
+        data: [95, 90, 95, 85, 90, 80],
+        fill: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        borderColor: '#000',
+        borderWidth: 3,
+        borderDash: [5, 5],
+        pointBackgroundColor: 'transparent',
+        pointBorderColor: 'transparent'
+      }]
+    },
+    options: {
+      elements: { line: { tension: 0 } }, /* Brutalist rigid lines */
+      scales: {
+        r: {
+          angleLines: { color: '#050505', lineWidth: 2 },
+          grid: { color: '#050505', lineWidth: 2 },
+          pointLabels: { font: { family: 'Space Grotesk', size: 14, weight: 'bold' }, color: '#050505' },
+          ticks: { display: false, min: 0, max: 100 }
+        }
+      },
+      plugins: {
+        legend: { labels: { font: { family: 'Space Grotesk', size: 14, weight: 'bold' }, color: '#050505' } }
+      }
+    }
+  });
+}
+
+function renderRoadmap() {
+  document.getElementById("upload-section").style.display = "none";
+  document.getElementById("roadmap-section").style.display = "block";
+  document.getElementById("roadmap-title").textContent = "Roadmap to " + activeRoadmap.target_role;
+
+  const acq = activeRoadmap.skills_acquired;
+  document.getElementById("skills-acquired").innerHTML = acq.length ? 
+    acq.map(s => `<span class="job-tag">${s}</span>`).join("") :
+    "<span style='color:var(--text-3); font-size:13px; font-weight:700;'>No direct skills detected.</span>";
+
+  const missingContainer = document.getElementById("skills-missing-list");
+  missingContainer.innerHTML = "";
+  
+  if (!activeRoadmap.skills_missing || activeRoadmap.skills_missing.length === 0) {
+    missingContainer.innerHTML = "<p style='color:var(--accent-2);'>You have all the required skills to apply!</p>";
+  } else {
+    activeRoadmap.skills_missing.forEach((item, index) => {
+      missingContainer.innerHTML += `
+        <div class="check-item ${item.completed ? 'completed' : ''}" id="check-${index}" style="display:flex; justify-content:space-between; align-items:center; cursor:default;">
+          <div style="display:flex; align-items:center; flex:1; cursor:pointer;" onclick="toggleState(${index})">
+            <div class="check-box">${item.completed ? '✓' : ''}</div>
+            <div class="check-text">${item.skill}</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <a href="https://leetcode.com/problemset/all/?search=${encodeURIComponent(item.skill)}" target="_blank" class="btn btn-secondary" style="padding: 4px 10px; font-size:11px; border-radius:6px; color:var(--text); text-decoration:none;">👨‍💻 LeetCode</a>
+            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(item.skill)}+tutorial" target="_blank" class="btn btn-secondary" style="padding: 4px 10px; font-size:11px; border-radius:6px; color:var(--text); text-decoration:none;">📺 YouTube</a>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  updateProgress();
+  renderRadarChart(acq.length);
+}
+
+function updateProgress() {
+  const completedCount = activeRoadmap.skills_missing.filter(s => s.completed).length;
+  const total = activeRoadmap.skills_missing.length;
+  const percent = total === 0 ? 100 : Math.round((completedCount / total) * 100);
+  document.getElementById("progress-bar").style.width = percent + "%";
+  document.getElementById("progress-text").textContent = percent + "% Job-Ready";
+}
+
+let currentCompIndex = -1;
+
+async function toggleState(index) {
+  if (activeRoadmap.skills_missing[index].completed) return;
+
+  const skill = activeRoadmap.skills_missing[index].skill;
+  currentCompIndex = index;
+  document.getElementById("compiler-modal").style.display = "flex";
+  document.getElementById("comp-skill").textContent = skill;
+  const promptEl = document.getElementById("comp-prompt");
+  const codeEl = document.getElementById("comp-code");
+  const feedEl = document.getElementById("comp-feedback");
+  const btn = document.getElementById("comp-submit");
+  
+  promptEl.textContent = "Loading challenge via Gemini...";
+  codeEl.value = "";
+  feedEl.style.display = "none";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/generate-challenge", {
+      method: "POST", headers: {"Content-Type":"application/json", "Authorization": "Bearer "+token},
+      body: JSON.stringify({ skill })
+    });
+    const data = await res.json();
+    promptEl.innerHTML = `<strong>Challenge:</strong> ${data.challenge || "Error retrieving challenge."}`;
+    btn.disabled = false;
+    codeEl.focus();
+  } catch (err) { promptEl.textContent = "Failed to load challenge."; }
+}
+
+function closeCompiler() {
+  document.getElementById("compiler-modal").style.display = "none";
+}
+
+async function submitCompiler() {
+  const skill = activeRoadmap.skills_missing[currentCompIndex].skill;
+  const challenge = document.getElementById("comp-prompt").textContent.replace("Challenge: ", "");
+  const code = document.getElementById("comp-code").value.trim();
+  const feedEl = document.getElementById("comp-feedback");
+  const btn = document.getElementById("comp-submit");
+  
+  if(!code) return alert("Write some code first!");
+  btn.disabled = true;
+  btn.textContent = "Grading...";
+
+  try {
+    const res = await fetch("/api/grade-challenge", {
+      method: "POST", headers: {"Content-Type":"application/json", "Authorization": "Bearer "+token},
+      body: JSON.stringify({ skill, challenge, code })
+    });
+    const data = await res.json();
+    
+    if(data.passed) {
+      feedEl.style.display = "block";
+      feedEl.style.background = "rgba(0, 255, 100, 0.1)";
+      feedEl.style.color = "#00ff64";
+      feedEl.style.border = "1px solid rgba(0,255,100,0.4)";
+      feedEl.textContent = "✅ Passed! " + (data.feedback || "Great job.");
+      if(window.confetti) confetti({ particleCount: 150, spread: 80, origin: {y:0.6} });
+      
+      const checkItem = document.getElementById(`check-${currentCompIndex}`);
+      checkItem.classList.add("completed");
+      checkItem.querySelector(".check-box").textContent = "✓";
+      activeRoadmap.skills_missing[currentCompIndex].completed = true;
+      updateProgress();
+      await saveRoadmapData(activeRoadmap);
+      
+      setTimeout(closeCompiler, 2500);
+    } else {
+      feedEl.style.display = "block";
+      feedEl.style.background = "rgba(255, 51, 102, 0.1)";
+      feedEl.style.color = "#ff3366";
+      feedEl.style.border = "1px solid rgba(255,51,102,0.4)";
+      feedEl.textContent = "❌ Failed: " + (data.feedback || "Review your syntax and try again.");
+    }
+  } catch (e) { alert("Error grading code"); }
+  
+  btn.disabled = false;
+  btn.textContent = "Submit Solution";
+}
+
+async function saveRoadmapData(updatedData) {
+  try {
+    await fetch('/api/roadmap/update', {
+      method: "POST", headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skills_missing: updatedData.skills_missing })
+    });
+  } catch(err) { console.error("Failed to sync progress"); }
+}
+
+function resetRoadmap() {
+  document.getElementById("roadmap-section").style.display = "none";
+  document.getElementById("upload-section").style.display = "block";
+}
+
+async function generateRoadmap() {
+  const targetRole = document.getElementById("target-role").value.trim() || "Software Engineer";
+  const skills = document.getElementById("skills-input").value.trim();
+  
+  if (!skills) return alert("Please enter some skills first!");
+
+  document.getElementById("upload-status").style.display = "block";
+  document.getElementById("upload-status").textContent = "Analyzing skills and generating AI roadmap...";
+  document.getElementById("generate-btn").disabled = true;
+
+  try {
+    const res = await fetch('/api/generate-roadmap', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetRole, skills })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    
+    activeRoadmap = data.roadmap;
+    document.getElementById("upload-status").style.display = "none";
+    document.getElementById("generate-btn").disabled = false;
+    renderRoadmap();
+  } catch (err) {
+    document.getElementById("upload-status").style.color = "#ff3366";
+    document.getElementById("upload-status").textContent = "Error: " + err.message;
+    document.getElementById("generate-btn").disabled = false;
+  }
+}
+
+// GitHub Auto-Profiler
+async function fetchGithubSkills() {
+  const username = document.getElementById("github-username").value.trim();
+  if(!username) return;
+  
+  const btn = document.getElementById("gh-btn");
+  btn.textContent = "Loading...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=15`);
+    if(!res.ok) throw new Error("GitHub user not found");
+    const repos = await res.json();
+    
+    // Extract unique languages used in their last 15 repos
+    const languages = new Set();
+    repos.forEach(repo => {
+       if(repo.language) languages.add(repo.language);
+       if(repo.topics && repo.topics.length > 0) repo.topics.forEach(r => languages.add(r));
+    });
+
+    if(languages.size === 0) {
+      alert("No public programming languages found on this GitHub.");
+    } else {
+      const skillsBox = document.getElementById("skills-input");
+      const generated = Array.from(languages).join(", ");
+      const current = skillsBox.value.trim();
+      skillsBox.value = current + (current ? ", " : "") + generated;
+      
+      // Auto-focus on generate button for huge flow improvement
+      document.getElementById("generate-btn").style.transform = "scale(1.05)";
+      setTimeout(() => document.getElementById("generate-btn").style.transform = "none", 300);
+    }
+  } catch(e) {
+    alert(e.message);
+  }
+
+  btn.textContent = "Fetch Repos";
+  btn.disabled = false;
+}
+
+// Init
+fetchRoadmap();
+
+function logout() {
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
+}
+</script>
+<!-- COMPILER MODAL OVERLAY -->
+<div id="compiler-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(10px); animation: fade-in 0.3s ease;">
+  <div style="background:var(--glass-2); border:1px solid rgba(0,229,255,0.3); border-radius:var(--radius-xl); padding:32px; width:90%; max-width:650px; box-shadow:0 30px 60px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,229,255,0.1);">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+      <div>
+         <h3 style="font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:10px;">
+           <span style="font-size:24px;">💻</span> AI Compiler Challenge
+         </h3>
+         <p style="color:var(--text-3); font-size:13px; margin-top:4px; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;">Skill Focus: <span id="comp-skill" style="color:var(--accent-2);"></span></p>
+      </div>
+      <button onclick="closeCompiler()" style="background:transparent; border:none; color:var(--text-3); font-size:28px; cursor:pointer; line-height:1; transition:0.2s;">×</button>
+    </div>
+    
+    <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:12px; margin-bottom:20px; border:1px dashed var(--border-2);">
+       <p id="comp-prompt" style="font-size:15px; color:var(--text); line-height:1.6; font-family:var(--font-body);"></p>
+    </div>
+    
+    <textarea id="comp-code" rows="8" style="width:100%; background:#0d0d14; border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; color:#00e5ff; font-family:monospace; font-size:15px; resize:vertical; outline:none; box-shadow:inset 0 4px 15px rgba(0,0,0,0.6); margin-bottom:20px;" placeholder="// Write your solution here..."></textarea>
+    
+    <div id="comp-feedback" style="display:none; padding:14px; border-radius:12px; margin-bottom:20px; font-size:14px; font-weight:600; line-height:1.5;"></div>
+
+    <div style="display:flex; justify-content:flex-end;">
+       <button id="comp-submit" class="btn btn-primary" onclick="submitCompiler()" style="box-shadow:0 10px 30px var(--accent-glow);">Submit Code</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+
+<script src="animations.js"></script></body></html>

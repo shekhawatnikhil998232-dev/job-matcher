@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard — JobSkillMatcher</title>
+  <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script></head>
+<body>
+
+<div class="bg-blob"></div>
+
+<div class="page">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-icon">🎯</div>
+      JobSkillMatcher
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html" class="">Dashboard</a>
+      <a href="jobs.html" class="">Jobs</a>
+      <a href="tracker.html" class="">Job Tracker</a>
+      <a href="mentors.html" class="">Mentors</a>
+      <a href="insights.html" class="">Campus Insights</a>
+      <a href="chat.html" class="">AI Chat</a>
+      <a href="leaderboard.html" class="active">Leaderboard</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-name"></span>
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <div class="dropdown-content">
+        <a href="profile.html">👤 Profile</a>
+        <button onclick="logout()" style="color: #ef4444;">🚪 Logout</button>
+      </div>
+    </div>
+  </nav>
+  
+    <main style="padding: 40px; max-width: 1000px; margin: 0 auto;">
+    <h1 class="page-title brutal-reveal" style="text-align:center; font-size: 60px; text-transform:uppercase;">Global Hackers</h1>
+    <p style="text-align:center; font-size:18px; color:var(--text-2); margin-bottom: 50px;">Complete AI Challenges on your Dashboard to earn XP.</p>
+
+    <div class="stat-card brutal-reveal" style="padding:0; overflow:hidden;" data-tilt="" data-tilt-max="4" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-body);">
+        <thead style="background: var(--surface-2); border-bottom: 4px solid var(--border);">
+          <tr>
+            <th style="padding: 20px; font-size:20px; font-weight:800; text-transform:uppercase;">Rank</th>
+            <th style="padding: 20px; font-size:20px; font-weight:800; text-transform:uppercase;">Hacker</th>
+            <th style="padding: 20px; font-size:20px; font-weight:800; text-transform:uppercase;">XP Score</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+           <tr><td colspan="3" style="padding: 40px; text-align:center; font-weight:600;">Loading global data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  </div>
+
+<script>
+  const user = localStorage.getItem("user");
+  if (!user) window.location.href = "login.html";
+  document.getElementById("nav-name").textContent = user;
+  document.getElementById("nav-avatar").textContent = user[0].toUpperCase();
+
+  async function loadLeaderboard() {
+    try {
+      const res = await fetch('/api/leaderboard');
+      const data = await res.json();
+      const tbody = document.getElementById("leaderboard-body");
+      
+      tbody.innerHTML = data.leaderboard.map((u, i) => {
+        const isCurrent = (u.username === user);
+        return `
+          <tr style="border-bottom: 2px solid var(--border); background: ${isCurrent ? 'var(--accent)' : 'var(--surface)'}; color: ${isCurrent ? '#fff' : 'var(--text)'}; transition: transform 0.1s ease, box-shadow 0.1s ease;">
+            <td style="padding: 24px; font-size: 28px; font-family: var(--font-head); font-weight:900;">
+              ${i === 0 ? '👑 1' : '#'+(i+1)}
+            </td>
+            <td style="padding: 24px; font-size: 24px; font-weight:700;">
+              ${u.username} ${isCurrent ? "(You)" : ""}
+            </td>
+            <td style="padding: 24px; font-size: 24px; font-family: var(--font-head); font-weight:900;">
+              ${u.xp}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch(e) {
+      document.getElementById("leaderboard-body").innerHTML = `<tr><td colspan="3" style="padding: 40px; text-align:center; color: var(--accent-2); font-weight:600;">Failed to load leaderboard.</td></tr>`;
+    }
+  }
+
+  loadLeaderboard();
+</script>
+
+
+<script src="animations.js"></script></body></html>

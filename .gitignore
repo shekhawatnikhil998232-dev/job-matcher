@@ -1,0 +1,6 @@
+node_modules/
+.env
+db.sqlite
+*.zip
+.DS_Store
+.gemini/

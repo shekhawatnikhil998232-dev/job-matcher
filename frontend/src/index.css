@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Premium Light Glassmorphism Palette */
+  --bg: #f8fafc; 
+  --surface: rgba(255, 255, 255, 0.65);
+  --surface-2: rgba(255, 255, 255, 0.9);
+  --text: #0f172a;
+  --text-2: #334155;
+  --text-3: #64748b;
+  
+  --accent: #6366f1;       /* Vibrant Indigo */
+  --accent-light: #818cf8;
+  --accent-2: #0ea5e9;     /* Sky Blue */
+  
+  --border-glass: rgba(255, 255, 255, 0.5);
+  --border-glass-hover: rgba(255, 255, 255, 0.8);
+
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+  --font-body: 'Outfit', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+body {
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Base Glass Utilities */
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+}

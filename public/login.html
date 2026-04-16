@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — JobSkillMatcher</title>
+  <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script></head>
+<body>
+<!-- NE0-BRUTALIST PARALLAX LAYERS -->
+<div class="parallax p-bg" style="position:fixed; top:20%; left:-5%; font-size:200px; font-weight:900; opacity:0.04; z-index:-1; pointer-events:none; white-space:nowrap; font-family:var(--font-head);">AUTHENTICATE</div>
+<div class="parallax p-shape" style="position:fixed; bottom:10%; right:10%; width:300px; height:300px; border:15px solid var(--border); opacity:0.1; z-index:-1; pointer-events:none;"></div>
+<div class="parallax p-icon" style="position:fixed; top:15%; right:15%; font-size:150px; font-weight:900; color:var(--accent); opacity:0.1; z-index:-1; pointer-events:none;">*</div>
+
+<div class="auth-container">
+  <div class="auth-card brutal-reveal" data-tilt="" data-tilt-max="4" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1">
+    <div class="auth-logo">JobSkillMatcher</div>
+    
+    <!-- LOGIN SECTION -->
+    <div id="login-section">
+      <h2>Welcome back</h2>
+      <p class="auth-sub">Sign in to your account to continue</p>
+
+      <div class="form-group">
+        <label class="form-label" for="login-email">Gmail Address</label>
+        <input type="email" id="login-email" placeholder="Enter your gmail address" autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password">
+      </div>
+
+      <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:8px;" onclick="login()">
+        Sign in →
+      </button>
+
+      <p style="text-align:center; font-size:14px; margin-top:20px; color:var(--text-2);">
+        Don't have an account? <a href="#" style="color:var(--accent); font-weight:500;" onclick="toggleAuth('signup')">Sign up</a>
+      </p>
+    </div>
+
+    <!-- SIGNUP SECTION -->
+    <div id="signup-section" style="display: none;">
+      <h2>Create an account</h2>
+      <p class="auth-sub">Sign up to get started</p>
+
+      <div class="form-group">
+        <label class="form-label" for="signup-username">Username</label>
+        <input type="text" id="signup-username" placeholder="Choose a username" autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="signup-email">Gmail Address</label>
+        <input type="email" id="signup-email" placeholder="Enter your gmail address" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="signup-password">Password</label>
+        <input type="password" id="signup-password" placeholder="Create a password" autocomplete="new-password">
+      </div>
+
+      <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:8px;" onclick="signup()">
+        Create account →
+      </button>
+
+      <p style="text-align:center; font-size:14px; margin-top:20px; color:var(--text-2);">
+        Already have an account? <a href="#" style="color:var(--accent); font-weight:500;" onclick="toggleAuth('login')">Log in</a>
+      </p>
+    </div>
+
+    <p class="form-error" id="auth-msg"></p>
+  </div>
+</div>
+
+<script>
+// Toggle UI Between Login and Signup
+function toggleAuth(mode) {
+  document.getElementById("auth-msg").textContent = ""; // clear err messages
+  if (mode === "signup") {
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("signup-section").style.display = "block";
+  } else {
+    document.getElementById("signup-section").style.display = "none";
+    document.getElementById("login-section").style.display = "block";
+  }
+}
+
+// --- LOGIN ---
+async function login() {
+  const email = document.getElementById("login-email").value.trim().toLowerCase();
+  const pass = document.getElementById("login-password").value;
+  const msg = document.getElementById("auth-msg");
+
+  if (!email || !pass) {
+    msg.textContent = "Please fill in both fields.";
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    
+    if (!res.ok) {
+      msg.textContent = data.error || "Login failed.";
+      return;
+    }
+
+    // Login success -> Store session the way the rest of the app expects it
+    localStorage.setItem("user", data.user.username);
+    localStorage.setItem("token", data.token); // Secure backend session token
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Network error. Could not reach the server.";
+  }
+}
+
+// --- SIGN UP ---
+async function signup() {
+  const user = document.getElementById("signup-username").value.trim();
+  const email = document.getElementById("signup-email").value.trim().toLowerCase();
+  const pass = document.getElementById("signup-password").value;
+  const msg = document.getElementById("auth-msg");
+
+  if (!user || !email || !pass) {
+    msg.textContent = "Please fill in all fields.";
+    return;
+  }
+
+  if (!email.endsWith("@gmail.com")) {
+    msg.textContent = "Please use a valid Gmail address (@gmail.com).";
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, email, password: pass })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.error || "Signup failed.";
+      return;
+    }
+
+    // Directly log them in to Dashboard after successful signup
+    // In a perfectly strict environment, we might call login() again, but saving the session locally is fine here.
+    localStorage.setItem("user", user);
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Network error. Could not reach the server.";
+  }
+}
+
+// Global Enter Key
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    if (document.getElementById("login-section").style.display !== "none") {
+      login();
+    } else {
+      signup();
+    }
+  }
+});
+</script>
+  <script>
+    // Mouse Interactive Parallax
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 50; // -25 to 25
+      const y = (e.clientY / window.innerHeight - 0.5) * 50;
+      
+      document.querySelectorAll('.p-bg').forEach(el => el.style.transform = `translate(${x * -2}px, ${y * -2}px)`);
+      document.querySelectorAll('.p-shape').forEach(el => el.style.transform = `translate(${x * 1.5}px, ${y * 1.5}px) rotate(${x}deg)`);
+      document.querySelectorAll('.p-icon').forEach(el => el.style.transform = `translate(${x * -4}px, ${y * -4}px)`);
+    });
+  </script>
+
+
+<script src="animations.js"></script></body></html>

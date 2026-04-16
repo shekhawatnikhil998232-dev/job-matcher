@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — JobSkillMatcher</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-blob"></div>
+<script>
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
+  if (!token || !user) window.location.href = "login.html";
+</script>
+
+<div class="page">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-icon">🎯</div>
+      JobSkillMatcher
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="chat.html">AI Chat</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-name"></span>
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <div class="dropdown-content">
+        <a href="profile.html">👤 Profile</a>
+        <button onclick="logout()" style="color: #ef4444;">🚪 Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main style="max-width: 600px; margin: 80px auto; padding: 40px; background: var(--surface); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass); text-align: center;">
+    
+    <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; display: flex; align-items: center; justify-content: center; font-size: 56px; font-family: var(--font-head); font-weight: 800; margin: 0 auto 24px auto; box-shadow: 0 10px 30px rgba(99,102,241,0.3);">
+      <span id="profile-initial"></span>
+    </div>
+
+    <h1 style="font-size: 32px; color: var(--text); margin-bottom: 8px;" id="profile-name"></h1>
+    <p style="color: var(--text-2); font-size: 18px; margin-bottom: 40px; background: var(--surface-2); display: inline-block; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-glass);">Member of JobSkillMatcher</p>
+    
+    <div style="display: flex; flex-direction: column; gap: 16px; text-align: left;">
+      <div style="background: var(--surface-2); padding: 20px; border-radius: 16px; border: 1px solid var(--border-glass);">
+        <p style="color: var(--text-3); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;">Username</p>
+        <p style="font-size: 18px; font-weight: 600; color: var(--text);" id="detail-name"></p>
+      </div>
+
+      <div style="background: var(--surface-2); padding: 20px; border-radius: 16px; border: 1px solid var(--border-glass);">
+        <p style="color: var(--text-3); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;">Account Type</p>
+        <p style="font-size: 18px; font-weight: 600; color: var(--text);">Free Student Tier</p>
+      </div>
+    </div>
+
+    <button onclick="logout()" class="btn" style="margin-top: 40px; width: 100%; padding: 16px; font-size: 18px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">Sign Out of All Devices</button>
+  </main>
+</div>
+
+<script>
+  document.getElementById("nav-name").textContent = user;
+  document.getElementById("nav-avatar").textContent = user ? user[0].toUpperCase() : "?";
+  
+  document.getElementById("profile-initial").textContent = user ? user[0].toUpperCase() : "?";
+  document.getElementById("profile-name").textContent = user;
+  document.getElementById("detail-name").textContent = user;
+
+  function logout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+  }
+</script>
+</body>
+</html>

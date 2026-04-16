@@ -1,0 +1,288 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Tracker — JobSkillMatcher</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+      align-items: start;
+    }
+    .kanban-column {
+      background: var(--surface);
+      border: 4px solid var(--border);
+      box-shadow: 8px 8px 0 var(--border);
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+    .col-header {
+      padding: 16px;
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 900;
+      text-transform: uppercase;
+      border-bottom: 4px solid var(--border);
+      color: #000;
+      display: flex;
+      justify-content: space-between;
+    }
+    .col-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 400px; /* Allow drop zone to take space */
+      transition: background 0.2s;
+    }
+    .k-card {
+      background: #fff;
+      border: 3px solid var(--border);
+      box-shadow: 4px 4px 0 var(--border);
+      padding: 16px;
+      cursor: grab;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .k-card:active { cursor: grabbing; transform: translate(2px, 2px)!important; box-shadow: 0 0 0 var(--border)!important; }
+    .k-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--border); }
+    .k-card.dragging { opacity: 0.5; }
+    
+    .c-wish { background: #ffcc00; } /* Yellow */
+    .c-app { background: #00e5ff; } /* Cyan */
+    .c-int { background: #a166ab; color: #fff;} /* Purple */
+    .c-off { background: #00ff66; } /* Green */
+    
+    .k-company { font-family: var(--font-head); font-weight: 800; font-size: 18px; margin-bottom: 4px; color: #000; }
+    .k-role { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 12px; }
+    .k-tag { display: inline-block; padding: 4px 8px; border: 2px solid var(--border); font-size: 11px; font-weight: 800; background: var(--surface-2); color: var(--border); text-transform: uppercase;}
+  </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script></head>
+<body>
+
+<div class="bg-blob"></div>
+
+<div class="page">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-icon">🎯</div>
+      JobSkillMatcher
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html" class="">Dashboard</a>
+      <a href="jobs.html" class="">Jobs</a>
+      <a href="tracker.html" class="active">Job Tracker</a>
+      <a href="mentors.html" class="">Mentors</a>
+      <a href="insights.html" class="">Campus Insights</a>
+      <a href="chat.html" class="">AI Chat</a>
+      <a href="leaderboard.html" class="">Leaderboard</a>
+    </div>
+    <div class="nav-user">
+      <span id="nav-name"></span>
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <div class="dropdown-content">
+        <a href="profile.html">👤 Profile</a>
+        <button onclick="logout()" style="color: #ef4444;">🚪 Logout</button>
+      </div>
+    </div>
+  </nav>
+  
+    <main style="padding: 40px; max-width: 1400px; margin: 0 auto; width: 100%;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+      <div>
+        <h1 class="page-title brutal-reveal" style="font-size: 50px; text-transform:uppercase; margin-bottom:10px;">Pipeline Board</h1>
+        <p style="font-size:18px; color:var(--text-3); font-weight:600; max-width: 600px;">Drag and drop to track your applications. Hardcode your opportunities visually so nothing slips through the cracks.</p>
+      </div>
+      <button class="btn btn-primary" onclick="addJob()" style="padding: 16px 24px; font-size: 18px; box-shadow: 6px 6px 0 var(--border);">+ MANUAL ENTRY</button>
+    </div>
+
+    <div class="kanban-board">
+      
+      <div class="kanban-column">
+        <div class="col-header c-wish">
+          <span>🎯 Wishlist</span>
+          <span class="count" id="count-wish">0</span>
+        </div>
+        <div class="col-body" id="col-wish"></div>
+      </div>
+
+      <div class="kanban-column">
+        <div class="col-header c-app">
+          <span>📄 Applied</span>
+          <span class="count" id="count-app">0</span>
+        </div>
+        <div class="col-body" id="col-app"></div>
+      </div>
+
+      <div class="kanban-column">
+        <div class="col-header c-int">
+          <span style="color:#fff;">🎙️ Interviewing</span>
+          <span class="count" id="count-int" style="color:#fff;">0</span>
+        </div>
+        <div class="col-body" id="col-int"></div>
+      </div>
+
+      <div class="kanban-column">
+        <div class="col-header c-off">
+          <span>✅ Offer</span>
+          <span class="count" id="count-off">0</span>
+        </div>
+        <div class="col-body" id="col-off"></div>
+      </div>
+
+    </div>
+  </main>
+  </div>
+
+<script>
+  const user = localStorage.getItem("user");
+  const token = localStorage.getItem("token");
+  if (!user || !token) window.location.href = "login.html";
+  document.getElementById("nav-name").textContent = user;
+  document.getElementById("nav-avatar").textContent = user[0].toUpperCase();
+
+  let pipeline = {
+    "col-wish": [],
+    "col-app": [],
+    "col-int": [],
+    "col-off": []
+  };
+
+  async function fetchPipeline() {
+    try {
+      const res = await fetch('/api/tracker', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      if (data.jobs) {
+        data.jobs.forEach(job => {
+          const targetCol = pipeline[job.pipeline_stage] ? job.pipeline_stage : "col-wish";
+          pipeline[targetCol].push(job);
+        });
+        renderBoard();
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  function renderCounts() {
+    document.getElementById("count-wish").textContent = pipeline["col-wish"].length;
+    document.getElementById("count-app").textContent = pipeline["col-app"].length;
+    document.getElementById("count-int").textContent = pipeline["col-int"].length;
+    document.getElementById("count-off").textContent = pipeline["col-off"].length;
+  }
+
+  function renderBoard() {
+    Object.keys(pipeline).forEach(colId => {
+      const colEl = document.getElementById(colId);
+      colEl.innerHTML = "";
+      pipeline[colId].forEach(job => {
+        const card = document.createElement("div");
+        card.className = "k-card";
+        card.draggable = true;
+        card.id = job.id;
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between;">
+             <div class="k-company">${job.company}</div>
+             <button onclick="deleteJob('${colId}', '${job.id}')" style="background:transparent; border:none; cursor:pointer; font-size:16px;">×</button>
+          </div>
+          <div class="k-role">${job.role}</div>
+          <div class="k-tag">${job.type}</div>
+        `;
+        
+        card.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", job.id);
+          e.dataTransfer.setData("sourceCol", colId);
+          setTimeout(() => card.classList.add("dragging"), 0);
+        });
+        
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+        });
+        
+        colEl.appendChild(card);
+      });
+    });
+    renderCounts();
+  }
+
+  function setupDropZones() {
+    document.querySelectorAll(".col-body").forEach(zone => {
+      zone.addEventListener("dragover", e => {
+        e.preventDefault();
+        zone.style.background = "var(--surface-2)";
+      });
+      zone.addEventListener("dragleave", e => {
+        zone.style.background = "transparent";
+      });
+      zone.addEventListener("drop", async e => {
+        e.preventDefault();
+        zone.style.background = "transparent";
+        
+        const cardId = e.dataTransfer.getData("text/plain");
+        const sourceColId = e.dataTransfer.getData("sourceCol");
+        const targetColId = zone.id;
+        
+        if (sourceColId === targetColId) return;
+        
+        const jobIndex = pipeline[sourceColId].findIndex(j => j.id == cardId);
+        if(jobIndex > -1) {
+          const [jobObj] = pipeline[sourceColId].splice(jobIndex, 1);
+          jobObj.pipeline_stage = targetColId;
+          pipeline[targetColId].push(jobObj);
+          
+          renderBoard();
+
+          // Sync with Server
+          try {
+             await fetch('/api/tracker/update', {
+                 method: "POST",
+                 headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'},
+                 body: JSON.stringify({ id: cardId, pipeline_stage: targetColId })
+             });
+          } catch(err) {}
+        }
+      });
+    });
+  }
+
+  async function addJob() {
+    const comp = prompt("Enter Company Name:");
+    if(!comp) return;
+    const role = prompt("Enter Job Role:");
+    if(!role) return;
+    
+    try {
+       const res = await fetch('/api/tracker/add', {
+           method: "POST",
+           headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'},
+           body: JSON.stringify({ company: comp, role: role, type: "Application" })
+       });
+       const data = await res.json();
+       if(data.id) {
+           pipeline["col-wish"].push({ id: data.id, company: comp, role: role, type: "Application", pipeline_stage: "col-wish" });
+           renderBoard();
+       }
+    } catch(err) { alert("Failed to save."); }
+  }
+  
+  async function deleteJob(colId, jobId) {
+      if(!confirm("Discard this application?")) return;
+      try {
+          await fetch('/api/tracker/delete/' + jobId, {
+             method: "DELETE",
+             headers: { 'Authorization': 'Bearer ' + token }
+          });
+          pipeline[colId] = pipeline[colId].filter(j => j.id != jobId);
+          renderBoard();
+      } catch(err) { alert("Failed to delete."); }
+  }
+
+  // Init Boot
+  fetchPipeline();
+  setupDropZones();
+</script>
+
+
+<script src="animations.js"></script></body></html>
