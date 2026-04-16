@@ -1,18 +1,13 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const multer = require('multer');
-const pdfParse = require('pdf-parse');
-const fs = require('fs');
 const { initializeDatabase } = require('./database');
-require('dotenv').config();
 
 const app = express();
 app.use(express.static('public'));
 app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret-key-123';
-const upload = multer({ dest: 'uploads/' });
 
 // We will hold our db instance here
 let db;
