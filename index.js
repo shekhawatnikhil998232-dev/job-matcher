@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { initializeDatabase } = require('./database');
+require('dotenv').config();
 
 const app = express();
 app.use(express.static('public'));
