@@ -296,12 +296,7 @@ Target Role: ${finalRole}
 Current Skills:
 ${skills}
 
-Analyze their current skills strictly against the required skills for only their requested Target Role. Return ONLY a pure JSON object using this exact schema, with no markdown formatting, no backticks, and no extra text:
-Target Role: ${finalRole}
-Current Skills:
-${skills}
-
-Analyze their current skills against the exact required skills for the target role. Return ONLY a pure JSON object using this exact schema, with no markdown formatting, no backticks, and no extra text:
+Analyze their current skills strictly against the required skills for ONLY their requested Target Role. Return ONLY a pure JSON object using this exact schema, with no markdown formatting, no backticks, and no extra text:
 {
   "skills_acquired": ["skill1", "skill2"],
   "skills_missing": ["missingskill1", "missingskill2"]
