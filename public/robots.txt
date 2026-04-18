@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /login.html
+Disallow: /*?*
+Disallow: /dashboard.html
+Disallow: /chat.html
+Disallow: /insights.html
+Disallow: /mentors.html
+Disallow: /tracker.html
+Disallow: /profile.html
+Disallow: /leaderboard.html
+Disallow: /jobs.html
+
+Sitemap: https://job-matcher-izz1.onrender.com/sitemap.xml
