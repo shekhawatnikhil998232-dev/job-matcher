@@ -141,7 +141,8 @@ Return ONLY a pure JSON object using this exact schema, with no markdown formatt
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 systemInstruction: { parts: [{ text: "You only output raw JSON. Do not include markdown like ```json." }] },
-                contents: [{ role: "user", parts: [{ text: prompt }] }]
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: "application/json" }
             })
         });
         const data = await response.json();
@@ -307,7 +308,8 @@ Analyze their current skills against the exact required skills for the target ro
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     systemInstruction: { parts: [{ text: "You only output raw JSON. Do not include markdown like ```json." }] },
-                    contents: [{ role: "user", parts: [{ text: prompt }] }]
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: { responseMimeType: "application/json" }
                 })
             });
 
