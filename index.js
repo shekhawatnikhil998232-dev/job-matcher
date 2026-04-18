@@ -314,8 +314,14 @@ Analyze their current skills strictly against the required skills for ONLY their
             });
 
             const data = await response.json();
+            
+            if (data.error) {
+                console.error("Gemini API Error:", data.error);
+                return res.status(500).json({ error: `AI Rate Limit / Provider Error: ${data.error.message}` });
+            }
+
             let rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!rawJson) return res.status(500).json({ error: "Failed to generate roadmap from AI." });
+            if (!rawJson) return res.status(500).json({ error: "Failed to parse roadmap from AI." });
             
             // Clean markdown backticks if any
             rawJson = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
