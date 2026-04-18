@@ -288,9 +288,15 @@ initializeDatabase().then((database) => {
         const finalRole = targetRole || "Software Engineer";
 
         try {
-            const prompt = `You are a strict JSON parser and an expert technical career advisor. You know the exact industry-standard skill roadmap for jobs including Software Engineer/Developer, Mobile Developer, Web Developer, Game Developer, Full Stack Developer, Frontend Developer, Backend Developer, ML Engineer, AI Engineer, Business Intelligence (BI) Developer, NLP Engineer, Software application Packager, QA Analyst/Software Tester, Data Scientist, Data Analyst, Data Engineer, AI/ML Engineer, Big Data Engineer, Database Administrator, Information Security Analyst (Cybersecurity Analyst), Cloud Engineer (AWS/Azure/GCP), Site Reliability Engineer (SRE), Platform Engineer, DevOps Engineer, Digital Forensics Expert, Security Engineer, Ethical Hacker/Penetration Tester, Product Designer, Interaction Designer, Test Engineer, Blockchain Developer, Robotics Engineer, Embedded Systems Engineer, AR/VR Developer, IoT Engineer, Project Manager, Technical Program Manager, Scrum Master, HelpDesk Engineer, Network Engineer, Network Administrator/Architect, Cloud Architect/Engineer, DevOps Engineer (or MLOps), IT Support Technician/Helpdesk, UX/UI Designer, Product Manager, Product Owner/Scrum Master, Information Architect, System Analyst, Chief Information Officer, Chief Technology Officer, IT Manager, Director of Engineering, Technical Lead, Social Media Manager, Growth Hacker, Content Strategist, and any other tech job.
+            const prompt = `You are a strict JSON parser and technical career advisor. The user wants a roadmap for a SINGLE specific target role.
+Even though you are capable of generating roadmaps for Software Engineer, Mobile Developer, Web Developer, Game Developer, Full Stack Developer, Frontend Developer, Backend Developer, ML Engineer, AI Engineer, BI Developer, NLP Engineer, QA Analyst, Data Scientist, Data Analyst, Data Engineer, Cybersecurity Analyst, Cloud Engineer, SRE, Platform Engineer, DevOps Engineer, Digital Forensics, Security Engineer, Ethical Hacker, Product Designer, Interaction Designer, Blockchain Developer, Robotics Engineer, Embedded Systems, AR/VR Developer, IoT Engineer, Project Manager, Scrum Master, Network Engineer, System Analyst, CTO, Growth Hacker, and Content Strategist, YOU MUST ONLY RETURN THE ROADMAP FOR THE REQUESTED TARGET ROLE.
 
-I am providing a list of skills a student currently has, and the target role they want.
+I am providing the skills the student currently has, and their ONE requested Target Role.
+Target Role: ${finalRole}
+Current Skills:
+${skills}
+
+Analyze their current skills strictly against the required skills for only their requested Target Role. Return ONLY a pure JSON object using this exact schema, with no markdown formatting, no backticks, and no extra text:
 Target Role: ${finalRole}
 Current Skills:
 ${skills}
@@ -308,8 +314,7 @@ Analyze their current skills against the exact required skills for the target ro
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     systemInstruction: { parts: [{ text: "You only output raw JSON. Do not include markdown like ```json." }] },
-                    contents: [{ role: "user", parts: [{ text: prompt }] }],
-                    generationConfig: { responseMimeType: "application/json" }
+                    contents: [{ role: "user", parts: [{ text: prompt }] }]
                 })
             });
 
