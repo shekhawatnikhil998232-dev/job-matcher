@@ -128,11 +128,14 @@ Challenge: "${challenge}"
 User's submitted code/answer:
 "${code}"
 
-Analyze their submission. If it fundamentally solves the challenge and looks reasonably correct, mark it as passed.
+Analyze their submission strictly. If there is ANY mistake in syntax (e.g., missing semicolons, unclosed brackets), typo, logic, or missed requirements, it MUST fail. Do not forgive small mistakes.
+If it passes, "feedback" should be a short success message.
+If it fails, "feedback" MUST be the specific error an IDE or compiler would throw (e.g., "SyntaxError: Missing semicolon", "ReferenceError: variable is undefined", or "LogicalError: expected output to be X").
+
 Return ONLY a pure JSON object using this exact schema, with no markdown formatting or backticks:
 {
   "passed": true|false,
-  "feedback": "A short 1-2 sentence feedback explaining why they passed or exactly what error they made."
+  "feedback": "..."
 }`;
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
             method: "POST", headers: { "Content-Type": "application/json" },
@@ -284,12 +287,14 @@ initializeDatabase().then((database) => {
         const finalRole = targetRole || "Software Engineer";
 
         try {
-            const prompt = `You are a strict JSON parser. I am providing a list of skills a student currently has, and the target role they want.
+            const prompt = `You are a strict JSON parser and an expert technical career advisor. You know the exact industry-standard skill roadmap for jobs including Software Engineer/Developer, Mobile Developer, Web Developer, Game Developer, Full Stack Developer, Frontend Developer, Backend Developer, ML Engineer, AI Engineer, Business Intelligence (BI) Developer, NLP Engineer, Software application Packager, QA Analyst/Software Tester, Data Scientist, Data Analyst, Data Engineer, AI/ML Engineer, Big Data Engineer, Database Administrator, Information Security Analyst (Cybersecurity Analyst), Cloud Engineer (AWS/Azure/GCP), Site Reliability Engineer (SRE), Platform Engineer, DevOps Engineer, Digital Forensics Expert, Security Engineer, Ethical Hacker/Penetration Tester, Product Designer, Interaction Designer, Test Engineer, Blockchain Developer, Robotics Engineer, Embedded Systems Engineer, AR/VR Developer, IoT Engineer, Project Manager, Technical Program Manager, Scrum Master, HelpDesk Engineer, Network Engineer, Network Administrator/Architect, Cloud Architect/Engineer, DevOps Engineer (or MLOps), IT Support Technician/Helpdesk, UX/UI Designer, Product Manager, Product Owner/Scrum Master, Information Architect, System Analyst, Chief Information Officer, Chief Technology Officer, IT Manager, Director of Engineering, Technical Lead, Social Media Manager, Growth Hacker, Content Strategist, and any other tech job.
+
+I am providing a list of skills a student currently has, and the target role they want.
 Target Role: ${finalRole}
 Current Skills:
 ${skills}
 
-Analyze their current skills against the target role. Return ONLY a pure JSON object using this exact schema, with no markdown formatting, no backticks, and no extra text:
+Analyze their current skills against the exact required skills for the target role. Return ONLY a pure JSON object using this exact schema, with no markdown formatting, no backticks, and no extra text:
 {
   "skills_acquired": ["skill1", "skill2"],
   "skills_missing": ["missingskill1", "missingskill2"]
