@@ -88,7 +88,7 @@ RULES:
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama3-8b-8192",
+                model: "llama-3.1-8b-instant",
                 messages: groqMessages
             })
         });
@@ -117,7 +117,7 @@ app.post('/api/generate-challenge', authenticateToken, async (req, res) => {
         const prompt = `Generate a single, short, practical coding or conceptual challenge for the skill: "${skill}". Keep it under 3 sentences. Do not provide the answer, just the question/challenge prompt.`;
         const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
             method: "POST", headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "llama3-8b-8192", messages: [{ role: "user", content: prompt }] })
+            body: JSON.stringify({ model: "llama-3.1-8b-instant", messages: [{ role: "user", content: prompt }] })
         });
         const data = await response.json();
         const challengeText = data.choices?.[0]?.message?.content || "Write a small snippet demonstrating your knowledge of " + skill + ".";
@@ -145,7 +145,7 @@ Return ONLY a pure JSON object using this exact schema, with no markdown formatt
         const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
             method: "POST", headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "llama3-8b-8192",
+                model: "llama-3.1-8b-instant",
                 messages: [
                     { role: "system", content: "You only output raw JSON. Do not include markdown like ```json." },
                     { role: "user", content: prompt }
@@ -202,7 +202,7 @@ Return ONLY a pure JSON object using this exact schema, with no markdown formatt
         const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
             method: "POST", headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "llama3-8b-8192",
+                model: "llama-3.1-8b-instant",
                 messages: [
                     { role: "system", content: "You only output raw JSON. Do not include markdown like ```json." },
                     { role: "user", content: prompt }
@@ -320,7 +320,7 @@ Analyze their current skills strictly against the required skills for ONLY their
                 method: "POST",
                 headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "llama3-8b-8192",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: "You only output raw JSON. Do not include markdown like ```json." },
                         { role: "user", content: prompt }
