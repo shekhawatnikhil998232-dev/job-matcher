@@ -72,30 +72,35 @@ RULES:
     }
 
     try {
-        const geminiMessages = messages.map(msg => ({
-            role: msg.role === "assistant" ? "model" : "user",
-            parts: [{ text: msg.content }]
+        const groqMessages = messages.map(msg => ({
+            role: msg.role === "assistant" ? "assistant" : "user",
+            content: msg.content
         }));
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        if (activeSystemPrompt) {
+            groqMessages.unshift({ role: "system", content: activeSystemPrompt });
+        }
+
+        const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
             method: "POST",
             headers: {
+                "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                systemInstruction: { parts: [{ text: activeSystemPrompt }] },
-                contents: geminiMessages
+                model: "llama3-8b-8192",
+                messages: groqMessages
             })
         });
 
         const data = await response.json();
 
         if (data.error) {
-            console.error("Gemini API error:", data.error);
+            console.error("Groq API error:", data.error);
             return res.status(500).json({ reply: "API error: " + data.error.message });
         }
 
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I could not generate a response. Please try again.";
+        const reply = data.choices?.[0]?.message?.content || "Sorry, I could not generate a response. Please try again.";
         res.json({ reply });
 
     } catch (err) {
@@ -110,12 +115,12 @@ app.post('/api/generate-challenge', authenticateToken, async (req, res) => {
     const { skill } = req.body;
     try {
         const prompt = `Generate a single, short, practical coding or conceptual challenge for the skill: "${skill}". Keep it under 3 sentences. Do not provide the answer, just the question/challenge prompt.`;
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+        const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+            method: "POST", headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "llama3-8b-8192", messages: [{ role: "user", content: prompt }] })
         });
         const data = await response.json();
-        const challengeText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Write a small snippet demonstrating your knowledge of " + skill + ".";
+        const challengeText = data.choices?.[0]?.message?.content || "Write a small snippet demonstrating your knowledge of " + skill + ".";
         res.json({ challenge: challengeText.trim() });
     } catch (e) { res.status(500).json({ error: "Failed to generate challenge" }); }
 });
@@ -137,18 +142,21 @@ Return ONLY a pure JSON object using this exact schema, with no markdown formatt
   "passed": true|false,
   "feedback": "..."
 }`;
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
+        const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+            method: "POST", headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                systemInstruction: { parts: [{ text: "You only output raw JSON. Do not include markdown like ```json." }] },
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-                generationConfig: { responseMimeType: "application/json" }
+                model: "llama3-8b-8192",
+                messages: [
+                    { role: "system", content: "You only output raw JSON. Do not include markdown like ```json." },
+                    { role: "user", content: prompt }
+                ],
+                response_format: { type: "json_object" }
             })
         });
         const data = await response.json();
-        let rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        let rawJson = data.choices?.[0]?.message?.content;
         
-        console.log("Gemini Grade Output:", rawJson);
+        console.log("Groq Grade Output:", rawJson);
         
         if (!rawJson) return res.status(500).json({ error: "Grading failed." });
         rawJson = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -191,15 +199,19 @@ Return ONLY a pure JSON object using this exact schema, with no markdown formatt
     { "title": "Core application", "tech_stack": "Node, React...", "bullets": ["Architectural description", "Performance metric mentioned"] }
   ]
 }`;
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
+        const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+            method: "POST", headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                systemInstruction: { parts: [{ text: "You only output raw JSON. Do not include markdown like ```json." }] },
-                contents: [{ role: "user", parts: [{ text: prompt }] }]
+                model: "llama3-8b-8192",
+                messages: [
+                    { role: "system", content: "You only output raw JSON. Do not include markdown like ```json." },
+                    { role: "user", content: prompt }
+                ],
+                response_format: { type: "json_object" }
             })
         });
         const data = await response.json();
-        let rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        let rawJson = data.choices?.[0]?.message?.content;
         
         if (!rawJson) return res.status(500).json({ error: "Resume generation failed." });
         rawJson = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -303,24 +315,28 @@ Analyze their current skills strictly against the required skills for ONLY their
 }
 `;
             
-            // Fetch from Gemini
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+            // Fetch from Groq
+            const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    systemInstruction: { parts: [{ text: "You only output raw JSON. Do not include markdown like ```json." }] },
-                    contents: [{ role: "user", parts: [{ text: prompt }] }]
+                    model: "llama3-8b-8192",
+                    messages: [
+                        { role: "system", content: "You only output raw JSON. Do not include markdown like ```json." },
+                        { role: "user", content: prompt }
+                    ],
+                    response_format: { type: "json_object" }
                 })
             });
 
             const data = await response.json();
             
             if (data.error) {
-                console.error("Gemini API Error:", data.error);
+                console.error("Groq API Error:", data.error);
                 return res.status(500).json({ error: `AI Rate Limit / Provider Error: ${data.error.message}` });
             }
 
-            let rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            let rawJson = data.choices?.[0]?.message?.content;
             if (!rawJson) return res.status(500).json({ error: "Failed to parse roadmap from AI." });
             
             // Clean markdown backticks if any
