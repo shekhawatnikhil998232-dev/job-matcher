@@ -77,7 +77,7 @@ RULES:
             parts: [{ text: msg.content }]
         }));
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -110,7 +110,7 @@ app.post('/api/generate-challenge', authenticateToken, async (req, res) => {
     const { skill } = req.body;
     try {
         const prompt = `Generate a single, short, practical coding or conceptual challenge for the skill: "${skill}". Keep it under 3 sentences. Do not provide the answer, just the question/challenge prompt.`;
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
         });
@@ -137,7 +137,7 @@ Return ONLY a pure JSON object using this exact schema, with no markdown formatt
   "passed": true|false,
   "feedback": "..."
 }`;
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 systemInstruction: { parts: [{ text: "You only output raw JSON. Do not include markdown like ```json." }] },
@@ -191,7 +191,7 @@ Return ONLY a pure JSON object using this exact schema, with no markdown formatt
     { "title": "Core application", "tech_stack": "Node, React...", "bullets": ["Architectural description", "Performance metric mentioned"] }
   ]
 }`;
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 systemInstruction: { parts: [{ text: "You only output raw JSON. Do not include markdown like ```json." }] },
@@ -304,7 +304,7 @@ Analyze their current skills strictly against the required skills for ONLY their
 `;
             
             // Fetch from Gemini
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
