@@ -2,26 +2,26 @@
 
 :root {
   /* ULTRA LIGHT MINIMALIST PALETTE */
-  --bg: #FFFFFF; 
-  --surface: #FCFCFC; 
-  --surface-2: #F5F5F5; 
-  
+  --bg: #FFFFFF;
+  --surface: #FCFCFC;
+  --surface-2: #F5F5F5;
+
   --text: #333333;
   --text-2: #666666;
   --text-3: #999999;
-  
-  --accent: #EBEBEB; 
-  --accent-2: #F1F1F1; 
+
+  --accent: #EBEBEB;
+  --accent-2: #F1F1F1;
   --accent-light: #FAFAFA;
-  
-  --border: #EEEEEE; 
-  --border-2: #E5E5E5; 
+
+  --border: #EEEEEE;
+  --border-2: #E5E5E5;
 
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
-  
+
   --font-body: 'Inter', sans-serif;
   --font-head: 'Inter', sans-serif;
 
@@ -46,7 +46,11 @@ body {
   color: var(--text);
 }
 
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   font-family: var(--font-head);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -167,7 +171,8 @@ h1, h2, h3, h4, h5 {
   display: block;
 }
 
-.dropdown-content a, .dropdown-content button {
+.dropdown-content a,
+.dropdown-content button {
   color: var(--text);
   padding: 12px 16px;
   text-decoration: none;
@@ -182,7 +187,8 @@ h1, h2, h3, h4, h5 {
   transition: 0.2s;
 }
 
-.dropdown-content a:hover, .dropdown-content button:hover {
+.dropdown-content a:hover,
+.dropdown-content button:hover {
   background-color: rgba(99, 102, 241, 0.05);
   color: var(--accent);
 }
@@ -200,24 +206,28 @@ h1, h2, h3, h4, h5 {
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   text-decoration: none;
 }
+
 .btn:hover {
   background: var(--surface-2);
   transform: translateY(-1px);
   box-shadow: var(--shadow-base);
 }
+
 .btn-primary {
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border-2);
 }
+
 .btn-primary:hover {
   background: var(--border);
   color: var(--text);
 }
+
 .btn:active {
   transform: translateY(1px);
 }
@@ -250,7 +260,7 @@ h1, h2, h3, h4, h5 {
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.03);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.03);
   padding: 32px;
 }
 
@@ -267,7 +277,9 @@ h1, h2, h3, h4, h5 {
   margin-left: 8px;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   padding: 14px 20px;
   background: var(--surface-2);
@@ -277,7 +289,7 @@ input, select, textarea {
   color: var(--text);
   font-size: 15px;
   transition: all 0.3s;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 
 textarea {
@@ -285,7 +297,9 @@ textarea {
   resize: vertical;
 }
 
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   outline: none;
   border-color: var(--accent);
   background: #fff;
@@ -302,13 +316,15 @@ input:focus, textarea:focus, select:focus {
   background: #fff;
   border: 1px solid var(--border-glass);
   color: var(--text-2);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
+
 .badge-accent {
   color: var(--accent);
   border-color: rgba(99, 102, 241, 0.2);
   background: rgba(99, 102, 241, 0.05);
 }
+
 .badge-green {
   color: var(--accent-3);
   border-color: rgba(16, 185, 129, 0.2);
@@ -366,10 +382,9 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sidebar-item.active {
-  background: #fff;
-  color: var(--accent);
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
-  border: 1px solid var(--border-glass);
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-2);
 }
 
 .dashboard-main {
@@ -400,11 +415,12 @@ input:focus, textarea:focus, select:focus {
   border-radius: var(--radius-pill);
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
 }
+
 .progress-bar {
   height: 100%;
-  background: var(--surface), var(--accent-2));
+  background: var(--text);
   border-radius: var(--radius-pill);
   width: 0%;
   transition: width 0.5s ease;
@@ -502,44 +518,69 @@ input:focus, textarea:focus, select:focus {
   padding: 40px;
   overflow-x: auto;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
 }
-th, td {
+
+th,
+td {
   padding: 20px;
   text-align: left;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
+
 th {
   font-weight: 600;
   color: var(--text);
   font-size: 18px;
 }
+
 td {
   color: var(--text-2);
   font-weight: 500;
 }
+
 td.check {
   color: var(--accent-3);
   font-weight: 800;
   font-size: 18px;
 }
+
 td.cross {
   color: var(--text-3);
   font-weight: 800;
 }
+
 tr:last-child td {
   border-bottom: none;
 }
 
 /* UTILITIES */
-.text-accent { color: var(--accent); }
-.text-center { text-align: center; }
-.mb-2 { margin-bottom: 8px; }
-.mb-4 { margin-bottom: 16px; }
-.mb-8 { margin-bottom: 32px; }
-.mt-8 { margin-top: 32px; }
+.text-accent {
+  color: var(--accent);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
+.mb-8 {
+  margin-bottom: 32px;
+}
+
+.mt-8 {
+  margin-top: 32px;
+}
 
 /* JOBS SPECIFIC */
 .job-card {
@@ -553,12 +594,14 @@ tr:last-child td {
   flex-direction: column;
   transition: all 0.3s;
 }
+
 .job-card:hover {
   transform: translateY(-5px);
   background: #fff;
   border-color: var(--border-glass-hover);
   box-shadow: var(--shadow-glass-hover);
 }
+
 .jobs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -573,6 +616,7 @@ tr:last-child td {
   align-items: center;
   justify-content: center;
 }
+
 .auth-card {
   width: 100%;
   max-width: 440px;
@@ -592,6 +636,7 @@ tr:last-child td {
     padding: 1rem 1.5rem;
     height: auto;
   }
+
   .nav-links {
     position: static;
     transform: none;
@@ -602,13 +647,17 @@ tr:last-child td {
     margin-top: 15px;
     gap: 8px;
   }
+
   .navbar-brand {
     order: 1;
   }
+
   /* If right side is login btn or nav-user */
-  .btn, .nav-user {
+  .btn,
+  .nav-user {
     order: 2;
   }
+
   /* Make all primary buttons fit easily */
   .nav-links a {
     padding: 8px 14px;
@@ -618,4 +667,7 @@ tr:last-child td {
 
 
 /* OVERRIDES FOR MINIMALISM */
-.parallax { display: none !important; opacity: 0 !important; }
+.parallax {
+  display: none !important;
+  opacity: 0 !important;
+}
