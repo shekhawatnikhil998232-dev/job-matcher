@@ -1,28 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Premium Light Glassmorphism Palette */
-  --bg: #f8fafc; 
-  --surface: rgba(255, 255, 255, 0.65);
-  --surface-2: rgba(255, 255, 255, 0.9);
-  --text: #0f172a;
-  --text-2: #334155;
-  --text-3: #64748b;
+  /* Premium Dark Glassmorphism Palette */
+  --bg: #0f172a; 
+  --surface: rgba(30, 41, 59, 0.65);
+  --surface-2: rgba(30, 41, 59, 0.9);
+  --text: #f8fafc;
+  --text-2: #cbd5e1;
+  --text-3: #94a3b8;
   
-  --accent: #6366f1;       /* Vibrant Indigo */
-  --accent-light: #818cf8;
-  --accent-2: #0ea5e9;     /* Sky Blue */
-  --accent-3: #10b981;     /* Emerald */
+  --accent: #818cf8;       /* Lighter Indigo */
+  --accent-light: #a5b4fc;
+  --accent-2: #38bdf8;     /* Bright Sky */
+  --accent-3: #34d399;     /* Bright Emerald */
   
-  --border-glass: rgba(255, 255, 255, 0.5);
-  --border-glass-hover: rgba(255, 255, 255, 0.8);
+  --border-glass: rgba(255, 255, 255, 0.1);
+  --border-glass-hover: rgba(255, 255, 255, 0.2);
 
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-  --shadow-glass-hover: 0 12px 40px 0 rgba(99, 102, 241, 0.15);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --shadow-glass-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
   
-  --shadow-in: inset 0 0 0 1px var(--border-glass), 0 2px 8px rgba(0,0,0,0.05);
-  --shadow-out: 0 4px 24px -4px rgba(0, 0, 0, 0.1);
-  --shadow-out-hover: 0 12px 32px -4px rgba(0, 0, 0, 0.15);
+  --shadow-in: inset 0 0 0 1px var(--border-glass), 0 2px 8px rgba(0,0,0,0.2);
+  --shadow-out: 0 4px 24px -4px rgba(0, 0, 0, 0.3);
+  --shadow-out-hover: 0 12px 32px -4px rgba(0, 0, 0, 0.5);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -46,8 +46,8 @@
 body {
   background-color: var(--bg);
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.1), transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.05), transparent 40%);
   background-size: cover;
   background-attachment: fixed;
   min-height: 100vh;
@@ -69,7 +69,7 @@ h1, h2, h3, h4, h5 {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 3rem;
-  background: rgba(248, 250, 252, 0.7);
+  background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-glass);
@@ -219,7 +219,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .btn:hover {
-  background: #fff;
+  background: rgba(15, 23, 42, 0.8);
   border-color: var(--border-glass-hover);
   transform: translateY(-2px);
   color: var(--accent);
@@ -308,7 +308,7 @@ textarea {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent);
-  background: #fff;
+  background: rgba(15, 23, 42, 0.8);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
@@ -319,7 +319,7 @@ input:focus, textarea:focus, select:focus {
   border-radius: var(--radius-pill);
   font-size: 13px;
   font-weight: 600;
-  background: #fff;
+  background: rgba(15, 23, 42, 0.8);
   border: 1px solid var(--border-glass);
   color: var(--text-2);
   box-shadow: 0 2px 5px rgba(0,0,0,0.02);
@@ -380,13 +380,13 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sidebar-item:hover {
-  background: #fff;
+  background: rgba(15, 23, 42, 0.8);
   color: var(--accent);
   box-shadow: var(--shadow-glass);
 }
 
 .sidebar-item.active {
-  background: #fff;
+  background: rgba(15, 23, 42, 0.8);
   color: var(--accent);
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
   border: 1px solid var(--border-glass);
@@ -468,7 +468,7 @@ input:focus, textarea:focus, select:focus {
 
 .feature-card:hover {
   transform: translateY(-8px);
-  background: #fff;
+  background: rgba(15, 23, 42, 0.8);
   border-color: var(--border-glass-hover);
   box-shadow: var(--shadow-glass-hover);
 }
@@ -575,7 +575,7 @@ tr:last-child td {
 }
 .job-card:hover {
   transform: translateY(-5px);
-  background: #fff;
+  background: rgba(15, 23, 42, 0.8);
   border-color: var(--border-glass-hover);
   box-shadow: var(--shadow-glass-hover);
 }
