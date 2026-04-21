@@ -232,14 +232,37 @@ Return ONLY a pure JSON object using this exact schema, with no markdown formatt
 initializeDatabase().then((database) => {
     db = database; // assign global db connection
 
-    // --- LEADERBOARD ENDPOINT ---
+    // --- LEADERBOARD ENDPOINT (JAVA NATIVE ENGINE BOUND) ---
     app.get('/api/leaderboard', async (req, res) => {
         try {
-            const topUsers = await db.all('SELECT username, xp FROM users ORDER BY xp DESC LIMIT 10');
-            res.json({ leaderboard: topUsers });
+            const { exec } = require("child_process");
+            
+            // Spin up a Java JVM thread to run the Analytics Engine on the DB
+            exec('cd java-core && java --enable-native-access=ALL-UNNAMED -cp .:sqlite-jdbc-3.41.2.1.jar LeaderboardEngine ../db.sqlite', async (error, stdout, stderr) => {
+                if (error) {
+                    // Critical Enterprise Strategy: If Java is missing on the production server (like standard Render), fallback safely to JS.
+                    console.warn("Java JVM Execution Failed. Deploying Node.js Failover Engine =>");
+                    const topUsers = await db.all('SELECT username, xp FROM users ORDER BY xp DESC LIMIT 10');
+                    return res.json({ leaderboard: topUsers });
+                }
+                
+                try {
+                    // Filter stdout to bypass arbitrary JVM warnings (Extract JSON array)
+                    const jsonStart = stdout.indexOf('{');
+                    if (jsonStart === -1) throw new Error("No JSON payload received from Java Core");
+                    
+                    const cleanOutput = stdout.substring(jsonStart);
+                    const leaderboardData = JSON.parse(cleanOutput);
+                    
+                    res.json(leaderboardData);
+                } catch(e) {
+                    console.error("Failed to parse Java Engine payload:", e);
+                    res.status(500).json({ error: "Java Data Engine Corruption" });
+                }
+            });
         } catch(err) {
-            console.error("Leaderboard error:", err);
-            res.status(500).json({ error: "Failed to load leaderboard" });
+            console.error("Leaderboard init error:", err);
+            res.status(500).json({ error: "Failed to initialize Java Leaderboard" });
         }
     });
 
